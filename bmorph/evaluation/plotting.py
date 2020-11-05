@@ -9,6 +9,7 @@ import scipy
 import networkx as nx
 import graphviz as gv
 import pygraphviz as pgv
+import probscale
 from networkx.drawing.nx_agraph import graphviz_layout
 
 from bmorph.evaluation.constants import colors99p99
@@ -1531,7 +1532,7 @@ def compare_CDF(flow_dataset:xr.Dataset, plot_sites: list,
     else:
         raise Exception("Please enter logarithm_base as '10' or 'e'")
     
-    n_rows, n_cols = bmorph.plotting.determine_row_col(len(plot_sites))
+    n_rows, n_cols = determine_row_col(len(plot_sites))
     
     fig, axes = plt.subplots(n_rows, n_cols, figsize = figsize, sharex = sharex, sharey = sharey)
     axes = axes.flatten()
@@ -2077,7 +2078,7 @@ def compare_mean_grouped_CPD(flow_dataset:xr.Dataset, plot_sites: list, grouper_
     if len(plot_colors) < len(bc_vars):
         raise Exception(f"Please enter at least {len(bc_vars)} colors in plot_colors")
     
-    n_rows, n_cols = bmorph.plotting.determine_row_col(len(plot_sites))
+    n_rows, n_cols = determine_row_col(len(plot_sites))
     
     fig, axes = plt.subplots(n_rows, n_cols, figsize = figsize, sharex = sharex, sharey = sharey)
     axes = axes.flatten()      
