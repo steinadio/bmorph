@@ -1672,7 +1672,8 @@ def kl_divergence_annual_compare(flow_dataset: xr.Dataset, sites: list,
                                  plot_colors: list,
                                  fontsize_title = 40, fontsize_tick = 30, fontsize_labels = 40, 
                                  fontsize_legend = 30,
-                                 showfliers = False, sharex = True, sharey = 'row', TINY_VAL = 1e-6, 
+                                 showfliers = False, notch = True,
+                                 sharex = True, sharey = 'row', TINY_VAL = 1e-6, 
                                  figsize = (30,20), show_y_grid = True):
     """
     Kullback Liebler Divergence Annual Comparison
@@ -1759,7 +1760,7 @@ def kl_divergence_annual_compare(flow_dataset: xr.Dataset, sites: list,
         ax=axs_list[i]
         plot_vals = [kldiv_refraw_annual[site].values]
         plot_vals.extend([kldiv_refbc_annual[site].values for kldiv_refbc_annual in kldiv_refbc_annuals])
-        box_dict = ax.boxplot(plot_vals, patch_artist = True, showfliers = showfliers, widths = 0.8, notch = True)
+        box_dict = ax.boxplot(plot_vals, patch_artist = True, showfliers = showfliers, widths = 0.8, notch = notch)
         for item in ['boxes', 'fliers', 'medians', 'means']:
             for sub_item, color in zip(box_dict[item], plot_colors):
                 plt.setp(sub_item, color = color)
@@ -2084,11 +2085,14 @@ def compare_mean_grouped_CPD(flow_dataset:xr.Dataset, plot_sites: list, grouper_
     axes = axes.flatten()      
     
     time = flow_dataset['time'].values
-    raw_flow_df = pd.DataFrame(data = flow_dataset[raw_var].values, index=time, columns = plot_sites)
-    ref_flow_df = pd.DataFrame(data = flow_dataset[ref_var].values, index=time, columns = plot_sites)
+    raw_flow_df = pd.DataFrame(data = flow_dataset[raw_var].sel(seg=plot_sites).values, 
+                               index=time, columns = plot_sites)
+    ref_flow_df = pd.DataFrame(data = flow_dataset[ref_var].sel(seg=plot_sites).values, 
+                               index=time, columns = plot_sites)
     bc_flow_dfs = list()
     for bc_var in bc_vars:
-        bc_flow_df = pd.DataFrame(data = flow_dataset[bc_var].values, index = time, columns = plot_sites)
+        bc_flow_df = pd.DataFrame(data = flow_dataset[bc_var].sel(seg=plot_sites).values, 
+                                  index = time, columns = plot_sites)
         bc_flow_dfs.append(bc_flow_df)
         
     if not isinstance(subset_month, type(None)):
@@ -2135,16 +2139,16 @@ def compare_mean_grouped_CPD(flow_dataset:xr.Dataset, plot_sites: list, grouper_
         )
         
         probscale.probplot(raw, ax=ax, pp_kws=pp_kws,
-                           scatter_kws=dict(linestyle='none', marker='.', alpha=alpha, color = plot_colors[0], label=raw_name), 
-                           **common_opts)
+                           scatter_kws=dict(linestyle='none', marker='.', markersize = markersize, alpha=alpha, 
+                                            color = plot_colors[0], label=raw_name), **common_opts)
         probscale.probplot(ref, ax=ax, pp_kws=pp_kws, 
-                           scatter_kws=dict(linestyle='none', marker='.', alpha=alpha, color = plot_colors[1], label=ref_name), 
-                           **common_opts)
+                           scatter_kws=dict(linestyle='none', marker='.', markersize = markersize, alpha=alpha, 
+                                            color = plot_colors[1], label=ref_name), **common_opts)
         
         for j, cor in enumerate(cors):
             probscale.probplot(cor, ax=ax, pp_kws=pp_kws, 
-                               scatter_kws=dict(linestyle='none', marker='.', alpha=alpha, color = plot_colors[2+j], label=bc_names[j]), 
-                               **common_opts)
+                               scatter_kws=dict(linestyle='none', marker='.', markersize = markersize, alpha=alpha, 
+                                                color = plot_colors[2+j], label=bc_names[j]), **common_opts)
         
         ax.set_title(site, fontsize = fontsize_labels, position = (0.2, 0.8))
         ax.tick_params(axis = 'both', labelsize = fontsize_tick)
